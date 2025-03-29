@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suicidal Text Detection</title>
+    <!--bootstrap link-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <!--css-->
+    <link rel="stylesheet" href="static/styles.css">
+
+    <!--icons link-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!--font link-->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <p style="font-weight: 700;font-size: 20px;padding-top: 20px;">LifeCheck</p>
+            </a>
+            <p style="margin-top: 20px;margin-right: 20px;">Your Life Saving Web App</p>
+        </div>
+    </nav>
+
+    <!-- navbar end -->
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="container text-center">
+            <p style="font-size: 50px;font-weight: 600;">AI-Powered Suicidal Text Detection</p>
+            <h2>Detect and analyze potential suicide risks from text and images.</h2>
+            <br>
+            <h3>Help is available<p>A national Helpline Number</p>
+            </h3>
+
+            <h4> <i class="fa-solid fa-phone-volume"> </i> <a href="tel:+919152987821"
+                    style="text-decoration: none;color: white;letter-spacing: 2px;">9152987821</a>
+            </h4>
+        </div>
+    </header>
+
+    <!-- Main Section -->
+    <section class="container text-center">
+        <h2>Enter Text or Upload an Image</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <textarea id="manualText" class="form-control" placeholder="Enter text here..."></textarea>
+                <button class="btn mt-3" onclick="analyzeText()">Analyze Text</button>
+            </div>
+            <div class="col-md-6">
+                <input type="file" id="imageInput" class="form-control">
+                <button class="btn mt-3" onclick="analyzeImage()">Analyze Image</button>
+            </div>
+        </div>
+    </section>
+    <div id="loader" class="loader" style="display: none;"></div>
+
+
+    <!-- Result Section -->
+    <section id="resultSection" class="container text-center mt-4">
+        <h3>Analysis Result</h3>
+        <div id="result" class="alert alert-info">Your results will appear here.</div>
+    </section>
+    <!-- info section-->
+    <section class="info-section">
+        <div class="container">
+            <h2 class="mb-4 fw-bold">About This Project</h2>
+            <p class="info-description">
+                This project is designed to analyze text for specific keywords and detect potential risks using
+                AI-powered analysis.
+                It can process both typed and handwritten text from images using Optical Character Recognition (OCR).
+                The goal is to provide accurate insights while maintaining data privacy.
+            </p>
+
+            <div class="row gy-4">
+                <!-- Feature 1 -->
+                <div class="col-md-4">
+                    <div class="info-box p-4">
+                        <i class="fas fa-brain info-icon"></i>
+                        <h4>AI-Powered Analysis</h4>
+                        <p>Utilizes machine learning to scan and analyze text effectively.</p>
+                    </div>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="col-md-4">
+                    <div class="info-box p-4">
+                        <i class="fas fa-image info-icon"></i>
+                        <h4>Image Recognition</h4>
+                        <p>Extracts text from images using Optical Character Recognition (OCR).</p>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="col-md-4">
+                    <div class="info-box p-4">
+                        <i class="fas fa-lock info-icon"></i>
+                        <h4>Secure & Fast</h4>
+                        <p>Ensures data privacy while delivering real-time results.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- info ssection end -->
+
+    <!-- card sectioin start -->
+
+    <div class="container py-5  cont-contribute">
+        <h2 class="text-center mb-4">Contributors</h2>
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-4">
+            <div class="col">
+                <div class="card h-100">
+                    <img src="/static/images/sujal.jpg" class="card-img-top imgcrd" alt="">
+                    <div class="card-body">
+                        <h5 class="card-title"><a href="https://www.linkedin.com/in/sujal-nichat-1811sn/" target="_blank" style="text-decoration: none;" rel="noopener noreferrer">SUJAL D. NICHAT</a></h5>
+                        <p class="card-text">Designed and developed the frontend of this website, ensuring a seamless,
+                            responsive, and visually appealing user experience. Using HTML, CSS, JavaScript, and
+                            Bootstrap 5.3.3, I crafted an intuitive interface that enhances accessibility and
+                            functionality.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <img src="..." class="card-img-top imgcrd" alt="Image 2">
+                    <div class="card-body">
+                        <h5 class="card-title">Card Title 2</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of
+                            the card's content.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <img src="..." class="card-img-top imgcrd" alt="Image 3">
+                    <div class="card-body">
+                        <h5 class="card-title">Card Title 3</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of
+                            the card's content.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <img src="..." class="card-img-top imgcrd" alt="Image 4">
+                    <div class="card-body">
+                        <h5 class="card-title">Card Title 4</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of
+                            the card's content.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <img src="..." class="card-img-top imgcrd" alt="/assets/images/sujal.jpg">
+                    <div class="card-body">
+                        <h5 class="card-title">Card Title 5</h5>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of
+                            the card's content.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- card section end -->
+
+    <!-- Footer -->
+
+    <footer class="container-fluid  py-4">
+        <div class="container ">
+        <div class="row ">
+
+            <div class="col-md-2 col-sm-6">
+                <ul class="list-unstyled">
+                    <p class="footerhead">Contributers</p>
+                    <li>SUJAL NICHAT</li>
+                    <li>TEJAS KALMEGH</li>
+                    <li>EKANSH PANDHRE</li>
+                    <li>SAYALI RAJURKAR</li>
+                    <li>JAYESH PACHGHARE</li>
+                </ul>
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <ul class="list-unstyled">
+                    <p class="footerhead">Guidence</p>
+                   <p>Project guidence By</p>
+                   <li>Prof. Abhiruchi Mishra (asst. Prof)</li>
+                   <li>Dept. of Artificial Intelligence And Data Science</li>
+                </ul>
+            </div>
+
+            <div class="col-md-4 col-sm-6">
+                <ul class="list-unstyled">
+                    <p class="footerhead">Department</p>
+
+                    <p>Department of Artificial Intelligence and Data Science <br><br>P. R. POTE PATIL COLLEGE OF
+                        ENGINEERING AND MANAGEMENT <br><br><i class="fa-solid fa-location-dot"></i> AMRAVATI , MH.</p>
+
+                </ul>
+            </div>
+
+
+            <div class="col-md-3 col-sm-12 text-center text-md-end mt-4">
+                <img src="/static/images/prppcem logo.jpeg" alt="Footer Image" style="height: 170px;margin-right: 20px;border-radius: 90px;"
+                    class="img-fluid">
+            </div>
+        </div>
+    </div>
+    </footer>
+
+    <!-- Footer end -->
+    <div class="container-fluid text-center py-3" style="background-color: #f8f9fa;">
+        <p>&copy; 2025 LifeCheck. Stay Always Safe</p>
+
+        <!-- javascript link -->
+        <script src="static\script.js"></script>
+
+</body>
+
+</html>
