@@ -5,14 +5,14 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import cv2
 import numpy as np
 import pytesseract
-from flask import Flask
+from flask import Flask, render_template
 from waitress import serve
 
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "Hello, Waitress is running!"
+    return render_template("index.html")
 
 if __name__ == "__main__":
     serve(app, host="0.0.0.0", port=5000)
@@ -20,7 +20,10 @@ if __name__ == "__main__":
 app = Flask(__name__)
 
 # Set Tesseract OCR Path
+import os
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+
 
 # Initialize Sentiment Analyzer
 sentiment_analyzer = SentimentIntensityAnalyzer()
