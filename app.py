@@ -5,6 +5,17 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import cv2
 import numpy as np
 import pytesseract
+from flask import Flask
+from waitress import serve
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Hello, Waitress is running!"
+
+if __name__ == "__main__":
+    serve(app, host="0.0.0.0", port=5000)
 
 app = Flask(__name__)
 
