@@ -4,13 +4,19 @@ from PIL import Image
 import cv2
 import numpy as np
 import pytesseract
+import shutil
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from waitress import serve
 
 app = Flask(__name__)
 
-# ✅ **Set Tesseract Path**
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# ✅ **Automatically find Tesseract in system PATH**
+tesseract_path = shutil.which("tesseract")
+if tesseract_path:
+    pytesseract.pytesseract.tesseract_cmd = tesseract_path
+    print(f"✅ Tesseract found at: {tesseract_path}")  # Debugging
+else:
+    print("⚠️ Tesseract not found! Make sure it's installed.")
 
 # ✅ **Initialize Sentiment Analyzer**
 sentiment_analyzer = SentimentIntensityAnalyzer()
@@ -58,14 +64,20 @@ def analyze_image():
     image_file = request.files["image"]
     image = Image.open(io.BytesIO(image_file.read()))
 
+    # Convert image to RGB mode if needed
+    if image.mode != "RGB":
+        image = image.convert("RGB")
+
     # Debugging: Check if image is read properly
     print("Image Mode:", image.mode)
 
     preprocessed_image = preprocess_image(image)
-    extracted_text = pytesseract.image_to_string(preprocessed_image)
 
-    # Debugging: Print extracted text
-    print("Extracted Text:", extracted_text)
+    try:
+        extracted_text = pytesseract.image_to_string(preprocessed_image)
+        print("Extracted Text:", extracted_text)  # Debugging
+    except Exception as e:
+        return jsonify({"error": f"OCR Error: {str(e)}"}), 500
 
     if not extracted_text.strip():
         return jsonify({"error": "No text detected."}), 400
