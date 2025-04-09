@@ -10,7 +10,7 @@ from waitress import serve
 
 app = Flask(__name__)
 
-# ✅ **Automatically find Tesseract in system PATH**
+# ✅ **Automatically find Tesseract**
 tesseract_path = shutil.which("tesseract")
 if tesseract_path:
     pytesseract.pytesseract.tesseract_cmd = tesseract_path
@@ -62,27 +62,30 @@ def analyze_image():
         return jsonify({"error": "No image uploaded"}), 400
 
     image_file = request.files["image"]
-    image = Image.open(io.BytesIO(image_file.read()))
-
-    # Convert image to RGB mode if needed
-    if image.mode != "RGB":
-        image = image.convert("RGB")
-
-    # Debugging: Check if image is read properly
-    print("Image Mode:", image.mode)
-
-    preprocessed_image = preprocess_image(image)
-
     try:
+        image = Image.open(io.BytesIO(image_file.read()))
+
+        # Convert image to RGB mode if needed
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+
+        # Debugging: Check if image is read properly
+        print("✅ Image received successfully. Mode:", image.mode)
+
+        preprocessed_image = preprocess_image(image)
+
+        # Extract text
         extracted_text = pytesseract.image_to_string(preprocessed_image)
-        print("Extracted Text:", extracted_text)  # Debugging
+        print("📝 Extracted Text:", extracted_text)  # Debugging
+
+        if not extracted_text.strip():
+            return jsonify({"error": "No text detected."}), 400
+
+        return jsonify(analyze_text(extracted_text))
+
     except Exception as e:
+        print("⚠️ Error processing image:", str(e))  # Debugging
         return jsonify({"error": f"OCR Error: {str(e)}"}), 500
-
-    if not extracted_text.strip():
-        return jsonify({"error": "No text detected."}), 400
-
-    return jsonify(analyze_text(extracted_text))
 
 # ✅ **Manual Text Analysis**
 @app.route("/analyze_text", methods=["POST"])
