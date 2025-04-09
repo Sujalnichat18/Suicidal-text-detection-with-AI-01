@@ -11,14 +11,13 @@ from waitress import serve
 
 app = Flask(__name__)
 
-# ✅ **Set Tesseract Path Explicitly**
-tesseract_path = shutil.which("tesseract") or "/usr/bin/tesseract"  # Default path for Linux
-if os.path.exists(tesseract_path):
+# ✅ **Set Tesseract Path & Handle Missing Installation**
+tesseract_path = shutil.which("tesseract") or "/usr/bin/tesseract"  # Default for Linux
+if tesseract_path and os.path.exists(tesseract_path):
     pytesseract.pytesseract.tesseract_cmd = tesseract_path
     print(f"✅ Tesseract found at: {tesseract_path}")
 else:
-    print("❌ Tesseract not found! Make sure it's installed.")
-    exit(1)  # Stop execution if Tesseract is missing
+    print("❌ Tesseract not found! OCR features will not work.")
 
 # ✅ **Initialize Sentiment Analyzer**
 sentiment_analyzer = SentimentIntensityAnalyzer()
@@ -30,14 +29,14 @@ suicidal_words = ["suicide", "die", "kill", "hopeless", "worthless"]
 
 # ✅ **Preprocess Image Function**
 def preprocess_image(image):
-    """Preprocess image to improve OCR accuracy."""
+    """Preprocess image for better OCR accuracy."""
     gray = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2GRAY)
     _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)  # High-contrast
     return Image.fromarray(thresh)
 
 # ✅ **Risk Analysis Function**
 def analyze_text(text):
-    """Analyze extracted text and calculate suicide risk percentage."""
+    """Analyze extracted text and determine suicide risk."""
     text = text.lower().strip()
 
     high_count = sum(1 for phrase in high_risk_phrases if phrase in text)
@@ -75,6 +74,10 @@ def analyze_image():
 
         preprocessed_image = preprocess_image(image)
 
+        # Ensure Tesseract is installed before running OCR
+        if not os.path.exists(tesseract_path):
+            return jsonify({"error": "Tesseract OCR is missing. Install it first."}), 500
+
         # Extract text using Tesseract OCR
         extracted_text = pytesseract.image_to_string(preprocessed_image)
         print(f"📝 Extracted Text: {repr(extracted_text)}")  # Debugging output
@@ -106,5 +109,5 @@ def home():
 
 # ✅ **Run App**
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))  # Get port from Render, default to 5000
+    port = int(os.environ.get("PORT", 10000))  # Use Render's port if available, default to 10000
     serve(app, host="0.0.0.0", port=port)
