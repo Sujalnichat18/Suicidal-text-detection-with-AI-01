@@ -5,18 +5,20 @@ import cv2
 import numpy as np
 import pytesseract
 import shutil
+import os
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from waitress import serve
 
 app = Flask(__name__)
 
-# ✅ **Automatically find Tesseract**
-tesseract_path = shutil.which("tesseract")
-if tesseract_path:
+# ✅ **Set Tesseract Path Explicitly**
+tesseract_path = shutil.which("tesseract") or "/usr/bin/tesseract"  # Default path for Linux
+if os.path.exists(tesseract_path):
     pytesseract.pytesseract.tesseract_cmd = tesseract_path
-    print(f"✅ Tesseract found at: {tesseract_path}")  # Debugging
+    print(f"✅ Tesseract found at: {tesseract_path}")
 else:
-    print("⚠️ Tesseract not found! Make sure it's installed.")
+    print("❌ Tesseract not found! Make sure it's installed.")
+    exit(1)  # Stop execution if Tesseract is missing
 
 # ✅ **Initialize Sentiment Analyzer**
 sentiment_analyzer = SentimentIntensityAnalyzer()
@@ -28,14 +30,14 @@ suicidal_words = ["suicide", "die", "kill", "hopeless", "worthless"]
 
 # ✅ **Preprocess Image Function**
 def preprocess_image(image):
-    """Preprocess the image for better OCR accuracy."""
+    """Preprocess image to improve OCR accuracy."""
     gray = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2GRAY)
-    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)  # High-contrast
     return Image.fromarray(thresh)
 
 # ✅ **Risk Analysis Function**
 def analyze_text(text):
-    """Analyze the text and calculate suicide risk."""
+    """Analyze extracted text and calculate suicide risk percentage."""
     text = text.lower().strip()
 
     high_count = sum(1 for phrase in high_risk_phrases if phrase in text)
@@ -65,32 +67,31 @@ def analyze_image():
     try:
         image = Image.open(io.BytesIO(image_file.read()))
 
-        # Convert image to RGB mode if needed
+        # Convert image to RGB if needed
         if image.mode != "RGB":
             image = image.convert("RGB")
 
-        # Debugging: Check if image is read properly
-        print("✅ Image received successfully. Mode:", image.mode)
+        print("✅ Image received. Processing...")
 
         preprocessed_image = preprocess_image(image)
 
-        # Extract text
+        # Extract text using Tesseract OCR
         extracted_text = pytesseract.image_to_string(preprocessed_image)
-        print("📝 Extracted Text:", extracted_text)  # Debugging
+        print(f"📝 Extracted Text: {repr(extracted_text)}")  # Debugging output
 
         if not extracted_text.strip():
-            return jsonify({"error": "No text detected."}), 400
+            return jsonify({"error": "No text detected. Ensure image quality is good."}), 400
 
         return jsonify(analyze_text(extracted_text))
 
     except Exception as e:
-        print("⚠️ Error processing image:", str(e))  # Debugging
+        print(f"⚠️ OCR Processing Error: {str(e)}")  # Debugging
         return jsonify({"error": f"OCR Error: {str(e)}"}), 500
 
 # ✅ **Manual Text Analysis**
 @app.route("/analyze_text", methods=["POST"])
 def analyze_manual_text():
-    """Analyze text entered manually."""
+    """Analyze manually entered text."""
     data = request.json
     text = data.get("text", "").strip()
     if not text:
@@ -105,4 +106,4 @@ def home():
 
 # ✅ **Run App**
 if __name__ == '__main__':
-    serve(app, host="0.0.0.0", port=5000)  # Use Waitress for deployment
+    serve(app, host="0.0.0.0", port=5000)  # Use Waitress for production deployment
