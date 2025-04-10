@@ -27,6 +27,9 @@ high_risk_phrases = ["i want to die", "i have no reason to live", "i will end my
 moderate_risk_phrases = ["i feel empty", "i don’t belong here", "i lost hope"]
 suicidal_words = ["suicide", "die", "kill", "hopeless", "worthless"]
 
+# ✅ **List of Safe Phrases (To Prevent False Alarms)**
+safe_phrases = ["my name is", "hello", "hi", "good morning", "how are you", "i feel okay"]
+
 # ✅ **Preprocess Image Function**
 def preprocess_image(image):
     """Preprocess image for better OCR accuracy."""
@@ -36,18 +39,30 @@ def preprocess_image(image):
 
 # ✅ **Risk Analysis Function**
 def analyze_text(text):
-    """Analyze extracted text and determine suicide risk."""
+    """Evaluate risk level of a given text based on predefined phrases and sentiment analysis."""
     text = text.lower().strip()
 
+    # 🚫 Ignore harmless common phrases to prevent false alarms
+    if any(text.startswith(phrase) for phrase in safe_phrases):
+        print(f"🟢 Safe phrase detected: {text}")
+        return {"text": text, "risk_percentage": 0, "risk_level": "🟢 Low Risk", "risk_color": "green"}
+
+    # Count occurrences of high/moderate risk phrases
     high_count = sum(1 for phrase in high_risk_phrases if phrase in text)
     moderate_count = sum(1 for phrase in moderate_risk_phrases if phrase in text)
     word_count = sum(1 for word in suicidal_words if word in text)
 
     sentiment_score = sentiment_analyzer.polarity_scores(text)["compound"]
+    print(f"🔍 Sentiment Score: {sentiment_score} for text: {text}")
 
-    risk_percentage = (high_count * 80) + (moderate_count * 50) + (word_count * 30) + ((1 - sentiment_score) * 40)
+    # **Fix 2**: Reduce the impact of neutral sentiment (Prevent overestimating risk)
+    sentiment_weight = (1 - sentiment_score) * 20  # Reduced from 40 to 20
+
+    # Calculate risk percentage
+    risk_percentage = (high_count * 80) + (moderate_count * 50) + (word_count * 30) + sentiment_weight
     risk_percentage = max(0, min(100, risk_percentage))
 
+    # Assign risk category
     if risk_percentage >= 60:
         return {"text": text, "risk_percentage": risk_percentage, "risk_level": "🔴 High Risk", "risk_color": "red"}
     elif risk_percentage >= 25:
@@ -97,8 +112,10 @@ def analyze_manual_text():
     """Analyze manually entered text."""
     data = request.json
     text = data.get("text", "").strip()
+    
     if not text:
         return jsonify({"error": "No text provided."}), 400
+    
     return jsonify(analyze_text(text))
 
 # ✅ **Serve Frontend**
