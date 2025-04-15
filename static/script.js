@@ -12,6 +12,12 @@ async function analyzeText() {
     });
 
     let result = await response.json();
+
+    if (!response.ok || result.error) {
+        alert("Error analyzing text: " + (result.error || "Unknown error"));
+        return;
+    }
+
     displayResult(result);
 }
 
@@ -36,20 +42,31 @@ async function analyzeImage() {
         });
 
         let result = await response.json();
+
+        if (!response.ok || result.error) {
+            throw new Error(result.error || "Unknown error occurred.");
+        }
+
         displayResult(result);
+
     } catch (error) {
         console.error("Error analyzing image:", error);
-        alert("Error processing image. Please try again.");
+        alert("Error processing image: " + error.message);
     } finally {
-        // Hide loader when process is complete
+        // Hide loader
         document.getElementById("loader").style.display = "none";
     }
 }
 
-
-
 function displayResult(result) {
     let resultDiv = document.getElementById("result");
+
+    if (!result || typeof result.risk_percentage !== "number") {
+        resultDiv.innerHTML = `<p style="color:red;"><strong>Error:</strong> Invalid result from server.</p>`;
+        resultDiv.style.display = "block";
+        return;
+    }
+
     resultDiv.innerHTML = `
         <p><strong>Extracted Text:</strong> ${result.text}</p>
         <p><strong>Risk Level:</strong> ${result.risk_level} (${result.risk_percentage.toFixed(2)}%)</p>
