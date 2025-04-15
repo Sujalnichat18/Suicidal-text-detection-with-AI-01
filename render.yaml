@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: suicidal-text-detection
+    env: python
+    buildCommand: "./render-build.sh"
+    startCommand: "waitress-serve --host=0.0.0.0 --port=$PORT app:app"
+    plan: free
