@@ -12,3 +12,4 @@ tesseract --version
 # Install Python dependencies
 echo "📥 Installing Python dependencies..."
 pip install --no-cache-dir -r requirements.txt
+
