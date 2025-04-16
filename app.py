@@ -1,28 +1,22 @@
 from flask import Flask, request, jsonify, render_template
 import io
+import os
 from PIL import Image
 import cv2
 import numpy as np
-import pytesseract
-import shutil
-import os
+import requests
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from waitress import serve
 
 app = Flask(__name__)
 
-# ✅ Tesseract Setup
-tesseract_path = shutil.which("tesseract") or "/usr/bin/tesseract"
-if tesseract_path and os.path.exists(tesseract_path):
-    pytesseract.pytesseract.tesseract_cmd = tesseract_path
-    print(f"✅ Tesseract found at: {tesseract_path}")
-else:
-    print("❌ Tesseract not found!")
+# ✅ Your OCR.space API Key
+OCR_API_KEY = "K82178011988957"  # Replace with your actual API key
 
 # ✅ Initialize Sentiment Analyzer
 sentiment_analyzer = SentimentIntensityAnalyzer()
 
-# ✅ Phrases
+# ✅ Risk Phrases
 high_risk_phrases = ["i want to die", "i have no reason to live", "i will end my life"]
 moderate_risk_phrases = ["i feel empty", "i don’t belong here", "i lost hope"]
 suicidal_words = ["suicide", "die", "kill", "hopeless", "worthless"]
@@ -70,7 +64,7 @@ def analyze_text(text):
         "risk_color": color
     }
 
-# ✅ Image Analysis Endpoint
+# ✅ OCR.space-powered Image Analysis
 @app.route("/analyze_image", methods=["POST"])
 def analyze_image():
     if "image" not in request.files or request.files["image"].filename == "":
@@ -80,18 +74,36 @@ def analyze_image():
 
     try:
         image = Image.open(io.BytesIO(image_file.read()))
-
         if image.mode != "RGB":
             image = image.convert("RGB")
 
         print("✅ Image received. Processing...")
 
+        # Optional: preprocess image (if it improves OCR results)
         preprocessed_image = preprocess_image(image)
 
-        if not os.path.exists(tesseract_path):
-            return jsonify({"error": "Tesseract OCR is missing. Install it first."}), 500
+        # Convert to in-memory file
+        img_byte_arr = io.BytesIO()
+        preprocessed_image.save(img_byte_arr, format='PNG')
+        img_byte_arr.seek(0)
 
-        extracted_text = pytesseract.image_to_string(preprocessed_image)
+        # Send to OCR.space
+        response = requests.post(
+            "https://api.ocr.space/parse/image",
+            files={"filename": img_byte_arr},
+            data={
+                "apikey": OCR_API_KEY,
+                "language": "eng",
+                "isOverlayRequired": False
+            }
+        )
+
+        result = response.json()
+
+        if result.get("IsErroredOnProcessing"):
+            return jsonify({"error": result.get("ErrorMessage", "OCR failed")}), 500
+
+        extracted_text = result["ParsedResults"][0]["ParsedText"]
         print(f"📝 Extracted Text: {repr(extracted_text)}")
 
         if not extracted_text.strip():
@@ -119,7 +131,7 @@ def analyze_manual_text():
 def home():
     return render_template("index.html")
 
-# ✅ Run
+# ✅ Run App
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     serve(app, host="0.0.0.0", port=port)
