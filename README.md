@@ -89,5 +89,7 @@ This application is intended for educational and research purposes only. It is n
 If you or someone you know is struggling, please seek help from a qualified professional or call a suicide prevention hotline.
 
 📬 Contact
+
+
 Made with ❤️ by Sujal Nichat and Team.
 
